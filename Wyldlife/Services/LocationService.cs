@@ -84,8 +84,8 @@ namespace Wyldlife.Services
             var command = Connection.CreateCommand();
             command.CommandText =
                 @"DELETE FROM dbo.Locations
-                    WHERE id=$uuid;";
-            command.Parameters.AddWithValue("$uuid", uuid.ToString());
+                    WHERE id=@uuid;";
+            command.Parameters.AddWithValue("@uuid", uuid.ToString());
         }
     }
 }
