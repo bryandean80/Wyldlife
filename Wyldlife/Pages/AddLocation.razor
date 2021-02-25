@@ -4,12 +4,11 @@
 @using Wyldlife.Models
 @inject Wyldlife.Services.LocationService locationservice
 @page "/AddLocation"
+@inject NavigationManager NavManager
 
 <h1>Add New Location</h1>
 
-<p>Name </p>
 <div class="input-group" style="width: 75%">
-    <input class="form-control" @bind="name" />
 </div>
 <br />
 <p>Coordinates (In Decimal)</p>
@@ -40,7 +39,6 @@
 
 @code {
     private int currentCount = 0;
-    string name { get; set; }
     string description { get; set; }
     string notes { get; set; }
     public double latitude { get; set; }
@@ -73,13 +71,20 @@
 
     private void Submit()
     {
-        location.Title = name;
         location.Id = Guid.NewGuid();
         location.Coords = Tuple.Create(latitude, longitude);
         location.Description = description;
         location.Notes = notes;
+
         locationservice.AddLocation(location);
+
+        description = string.Empty;
+        title = string.Empty;
+        notes = string.Empty;
+        latitude = 0.0;
+        longitude = 0.0;
+        NavManager.NavigateTo("/Location/" + location.Id.ToString());
     }
 
-   
+
 }

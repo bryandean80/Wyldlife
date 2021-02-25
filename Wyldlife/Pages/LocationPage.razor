@@ -1,0 +1,30 @@
+﻿@page "/Location/{locationid:guid}"
+@inject IJSRuntime jsRuntime
+@using Wyldlife.Models
+@inject Wyldlife.Services.LocationService locationservice
+
+<h3>@locationservice.GetLocations().First(x => x.Id == locationid).Title </h3>
+<p>Description</p>
+<div>
+    @locationservice.GetLocations().First(x => x.Id == locationid).Description
+</div>
+<br />
+<p>Notes</p>
+<div>
+    @locationservice.GetLocations().First(x => x.Id == locationid).Notes
+</div>
+<br />
+
+<button class="btn btn-primary" @onclick="OpenLocInMaps">Open Location in Google Maps</button>
+@code {
+    [Parameter]
+    public Guid locationid { get; set; }
+
+    public async Task OpenLocInMaps()
+    {
+        string lat = locationservice.GetLocations().First(x => x.Id == locationid).Coords.Item1.ToString();
+        string lon = locationservice.GetLocations().First(x => x.Id == locationid).Coords.Item2.ToString();
+        string url = "https://www.google.com/maps/search/?api=1&query=" + lat + "," + lon;
+        await jsRuntime.InvokeAsync<object>("open", url, "_blank");
+    }
+}

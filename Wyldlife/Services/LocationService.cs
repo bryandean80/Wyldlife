@@ -33,7 +33,7 @@ namespace Wyldlife.Services
                 while (reader.Read())
                 {
                     var loc = new Location();
-                    loc.Id = Guid.Parse(reader.GetString(0));
+                    loc.Id = reader.GetGuid(0);
                     loc.Title = reader.GetString(1);
                     loc.Coords = new Tuple<double, double>(reader.GetDouble(2), reader.GetDouble(3));
                     loc.Description = reader.GetString(4);
@@ -52,24 +52,26 @@ namespace Wyldlife.Services
             var command = Connection.CreateCommand();
             command.CommandText =
                 @"
-                INSERT INTO dbo.Locations (title, lat, long, descrip, note) VALUES(
+                INSERT INTO dbo.Locations (id, title, lat, long, descrip, note) VALUES(
+                    @id,
                     @title,
                     @lat,
                     @long,
                     @descrip,
                     @note
                     );";
+            command.Parameters.AddWithValue("@id", loc.Id);
             command.Parameters.AddWithValue("@title", loc.Title);
             command.Parameters.AddWithValue("@lat", loc.Coords.Item1);
             command.Parameters.AddWithValue("@long", loc.Coords.Item2);
             if(loc.Description == null)
             {
-                loc.Description = "null";
+                loc.Description = "N/A";
             }
             command.Parameters.AddWithValue("@descrip", loc.Description);
             if(loc.Notes == null)
             {
-                loc.Notes = "null";
+                loc.Notes = "N/A";
             }
             command.Parameters.AddWithValue("@note", loc.Notes);
             command.ExecuteNonQuery();
