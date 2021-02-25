@@ -12,5 +12,14 @@ namespace Wyldlife.Models
         public Tuple<double,double> Coords { get; set; }
         public string Description { get; set; }
         public string Notes { get; set; }
+
+        public Location()
+        {
+            Title = "New Title";
+            Id = Guid.NewGuid();
+            Coords = Tuple.Create(0.0, 0.0);
+            Description = "N/A";
+            Notes = "N/A";
+        }
     }
 }

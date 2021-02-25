@@ -1,6 +1,8 @@
 ﻿@inject IJSRuntime jsRuntime
 @using BrowserInterop.Extensions
 @using BrowserInterop.Geolocation
+@using Wyldlife.Models
+@inject Wyldlife.Services.LocationService locationservice
 @page "/AddLocation"
 
 <h1>Add New Location</h1>
@@ -20,14 +22,15 @@
 </div>
 <br />
 <p>Description (Optional)</p>
-<div class="input-group" style="width:75%">
-    <input class="form-control" @bind="description" />
+<div class="input-group" style="width: 75%">
+    <textarea style="width: 75%" class="form-control"></textarea>
 </div>
 <br />
 <p>Notes (Optional)</p>
-<div class="input-group" style="width:75%">
-    <input class="form-control" @bind="notes" />
+<div class="input-group" style="width: 75%">
+    <textarea style="width: 75%" class="form-control"></textarea>
 </div>
+<br />
 
 
 <button class="btn btn-primary" @onclick="Submit">Submit</button>
@@ -40,8 +43,9 @@
     string name { get; set; }
     string description { get; set; }
     string notes { get; set; }
-    double latitude { get; set; }
-    double longitude { get; set; }
+    public double latitude { get; set; }
+    public double longitude { get; set; }
+    Location location = new Location();
 
 
     private WindowNavigatorGeolocation geolocationWrapper;
@@ -69,11 +73,13 @@
 
     private void Submit()
     {
-        currentCount++;
+        location.Title = name;
+        location.Id = Guid.NewGuid();
+        location.Coords = Tuple.Create(latitude, longitude);
+        location.Description = description;
+        location.Notes = notes;
+        locationservice.addLocation(location);
     }
 
-    private void GetCords()
-    {
-
-    }
+   
 }
