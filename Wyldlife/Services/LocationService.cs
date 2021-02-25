@@ -53,17 +53,25 @@ namespace Wyldlife.Services
             command.CommandText =
                 @"
                 INSERT INTO dbo.Locations (title, lat, long, descrip, note) VALUES(
-                    $title,
-                    $lat,
-                    $long,
-                    $descrip,
-                    $note
+                    @title,
+                    @lat,
+                    @long,
+                    @descrip,
+                    @note
                     );";
-            command.Parameters.AddWithValue("$title", loc.Title);
-            command.Parameters.AddWithValue("$lat", loc.Coords.Item1);
-            command.Parameters.AddWithValue("$long", loc.Coords.Item2);
-            command.Parameters.AddWithValue("$descrip", loc.Description);
-            command.Parameters.AddWithValue("$note", loc.Notes);
+            command.Parameters.AddWithValue("@title", loc.Title);
+            command.Parameters.AddWithValue("@lat", loc.Coords.Item1);
+            command.Parameters.AddWithValue("@long", loc.Coords.Item2);
+            if(loc.Description == null)
+            {
+                loc.Description = "null";
+            }
+            command.Parameters.AddWithValue("@descrip", loc.Description);
+            if(loc.Notes == null)
+            {
+                loc.Notes = "null";
+            }
+            command.Parameters.AddWithValue("@note", loc.Notes);
             command.ExecuteNonQuery();
         }
 
