@@ -9,6 +9,7 @@ namespace Wyldlife.Models
     {
         public string Title { get; set; }
         public Guid Id { get; set; }
+        public String Author { get; set; }
         public Tuple<double,double> Coords { get; set; }
         public string Description { get; set; }
         public string Notes { get; set; }

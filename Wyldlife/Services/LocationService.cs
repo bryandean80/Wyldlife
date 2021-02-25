@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Razor.Language.Extensions;
 using Microsoft.Data.SqlClient;
 using Wyldlife.Models;
 
@@ -26,7 +27,7 @@ namespace Wyldlife.Services
         {
             List<Location> locations = new List<Location>();
             var command = Connection.CreateCommand();
-            command.CommandText = @"SELECT id,title,lat,long,descrip,note
+            command.CommandText = @"SELECT id,title,author,lat,long,descrip,note
                                     FROM dbo.Locations;";
             using (var reader = command.ExecuteReader())
             {
@@ -35,9 +36,10 @@ namespace Wyldlife.Services
                     var loc = new Location();
                     loc.Id = reader.GetGuid(0);
                     loc.Title = reader.GetString(1);
-                    loc.Coords = new Tuple<double, double>(reader.GetDouble(2), reader.GetDouble(3));
-                    loc.Description = reader.GetString(4);
-                    loc.Notes = reader.GetString(5);
+                    loc.Author = reader.GetString(2);
+                    loc.Coords = new Tuple<double, double>(reader.GetDouble(3), reader.GetDouble(4));
+                    loc.Description = reader.GetString(5);
+                    loc.Notes = reader.GetString(6);
                     locations.Add(loc);
                 }
             }
@@ -55,6 +57,7 @@ namespace Wyldlife.Services
                 INSERT INTO dbo.Locations (id, title, lat, long, descrip, note) VALUES(
                     @id,
                     @title,
+                    @author,
                     @lat,
                     @long,
                     @descrip,
@@ -62,6 +65,7 @@ namespace Wyldlife.Services
                     );";
             command.Parameters.AddWithValue("@id", loc.Id);
             command.Parameters.AddWithValue("@title", loc.Title);
+            command.Parameters.AddWithValue("@author", loc.Author);
             command.Parameters.AddWithValue("@lat", loc.Coords.Item1);
             command.Parameters.AddWithValue("@long", loc.Coords.Item2);
             if(loc.Description == null)
@@ -102,7 +106,7 @@ namespace Wyldlife.Services
             // TODO: Account for when long/lat are close to zero.
             List<Location> locations = new List<Location>();
             var command = Connection.CreateCommand();
-            command.CommandText = @"SELECT id,title,lat,long,descrip,note
+            command.CommandText = @"SELECT id,title,author,lat,long,descrip,note
                                     FROM dbo.Locations
                                     WHERE lat BETWEEN @minlat AND @maxlat
                                     AND long BETWEEN @minlong AND @maxlong;";
@@ -117,9 +121,10 @@ namespace Wyldlife.Services
                     var loc = new Location();
                     loc.Id = Guid.Parse(reader.GetString(0));
                     loc.Title = reader.GetString(1);
-                    loc.Coords = new Tuple<double, double>(reader.GetDouble(2), reader.GetDouble(3));
-                    loc.Description = reader.GetString(4);
-                    loc.Notes = reader.GetString(5);
+                    loc.Author = reader.GetString(2);
+                    loc.Coords = new Tuple<double, double>(reader.GetDouble(3), reader.GetDouble(4));
+                    loc.Description = reader.GetString(5);
+                    loc.Notes = reader.GetString(6);
                     locations.Add(loc);
                 }
             }
@@ -130,7 +135,7 @@ namespace Wyldlife.Services
         {
             List<Location> locations = new List<Location>();
             var command = Connection.CreateCommand();
-            command.CommandText = @"SELECT id,title,lat,long,descrip,note
+            command.CommandText = @"SELECT id,title,author,lat,long,descrip,note
                                     FROM dbo.Locations
                                     WHERE LOWER(title) LIKE LOWER(%@query%);";
             command.Parameters.AddWithValue("@query", query);
@@ -141,13 +146,61 @@ namespace Wyldlife.Services
                     var loc = new Location();
                     loc.Id = Guid.Parse(reader.GetString(0));
                     loc.Title = reader.GetString(1);
-                    loc.Coords = new Tuple<double, double>(reader.GetDouble(2), reader.GetDouble(3));
-                    loc.Description = reader.GetString(4);
-                    loc.Notes = reader.GetString(5);
+                    loc.Author = reader.GetString(2);
+                    loc.Coords = new Tuple<double, double>(reader.GetDouble(3), reader.GetDouble(4));
+                    loc.Description = reader.GetString(5);
+                    loc.Notes = reader.GetString(6);
                     locations.Add(loc);
                 }
             }
             return locations;
+        }
+
+        public Tuple<int,int> GetLocationRating(Guid id)
+        {
+            int rating, numRates;
+            var command = Connection.CreateCommand();
+            command.CommandText = @"SELECT AVG(rating), COUNT(rating) FROM dbo.Ratings
+                                    WHERE locationId=@id;";
+            command.Parameters.AddWithValue("@id", id);
+            using (var reader = command.ExecuteReader())
+            {
+                numRates = reader.GetInt32(1);
+                if(numRates == 0)
+                {
+                    rating = 5;
+                }
+                else
+                {
+                    rating = reader.GetInt32(0);
+                }
+            }
+
+            return new Tuple<int, int>(rating, numRates);
+        }
+
+        public List<Review> GetLocationReviews(Guid locationId)
+        {
+            List<Review> reviews = new List<Review>();
+            var command = Connection.CreateCommand();
+            command.CommandText = @"SELECT id, locationId, author, rating, reviewText
+                                    FROM dbo.Reviews
+                                    WHERE locationId=@id;";
+            command.Parameters.AddWithValue("@id", locationId);
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var review = new Review();
+                    review.Id = reader.GetGuid(0);
+                    review.LocationId = reader.GetGuid(1);
+                    review.Author = reader.GetString(2);
+                    review.Rating = reader.GetInt16(3);
+                    review.ReviewText = reader.GetString(4);
+                    reviews.Add(review);
+                }
+            }
+            return reviews;
         }
     }
 
