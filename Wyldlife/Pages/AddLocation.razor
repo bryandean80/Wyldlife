@@ -1,0 +1,79 @@
+﻿@inject IJSRuntime jsRuntime
+@using BrowserInterop.Extensions
+@using BrowserInterop.Geolocation
+@page "/AddLocation"
+
+<h1>Add New Location</h1>
+
+<p>Name </p>
+<div class="input-group" style="width: 75%">
+    <input class="form-control" @bind="name" />
+</div>
+<br />
+<p>Coordinates (In Decimal)</p>
+<div class="input-group form-inline" style="width: 75%">
+    <span>Latitude: </span>
+    <input class="form-control" @bind="latitude" />
+    <span>Longitude: </span>
+    <input class="form-control" @bind="longitude" />
+    <button class="btn btn-primary" @onclick="GetLocation">Use Current Location</button>
+</div>
+<br />
+<p>Description (Optional)</p>
+<div class="input-group" style="width:75%">
+    <input class="form-control" @bind="description" />
+</div>
+<br />
+<p>Notes (Optional)</p>
+<div class="input-group" style="width:75%">
+    <input class="form-control" @bind="notes" />
+</div>
+
+
+<button class="btn btn-primary" @onclick="Submit">Submit</button>
+
+
+
+
+@code {
+    private int currentCount = 0;
+    string name { get; set; }
+    string description { get; set; }
+    string notes { get; set; }
+    double latitude { get; set; }
+    double longitude { get; set; }
+
+
+    private WindowNavigatorGeolocation geolocationWrapper;
+    private GeolocationPosition currentPosition;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var window = await jsRuntime.Window();
+        var navigator = await window.Navigator();
+        geolocationWrapper = navigator.Geolocation;
+    }
+
+    public async Task GetLocation()
+    {
+        currentPosition = (await geolocationWrapper.GetCurrentPosition(new PositionOptions()
+        {
+            EnableHighAccuracy = true,
+            MaximumAgeTimeSpan = TimeSpan.FromHours(1),
+            TimeoutTimeSpan = TimeSpan.FromMinutes(1)
+
+        })).Location;
+        latitude = currentPosition.Coords.Latitude;
+        longitude = currentPosition.Coords.Longitude;
+    }
+
+    private void Submit()
+    {
+        currentCount++;
+    }
+
+    private void GetCords()
+    {
+
+    }
+}
