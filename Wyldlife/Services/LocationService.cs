@@ -115,7 +115,7 @@ namespace Wyldlife.Services
                 while (reader.Read())
                 {
                     var loc = new Location();
-                    loc.Id = Guid.Parse(reader.GetString(0));
+                    loc.Id = reader.GetGuid(0);
                     loc.Title = reader.GetString(1);
                     loc.Coords = new Tuple<double, double>(reader.GetDouble(2), reader.GetDouble(3));
                     loc.Description = reader.GetString(4);

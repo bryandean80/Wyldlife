@@ -1,7 +1,116 @@
-﻿@page "/"
+﻿@page "/{Distance:int}"
+@page "/"
+@page "/{Distance:int}/{query}"
+
+@inject IJSRuntime jsRuntime
+@using BrowserInterop.Extensions
+@using BrowserInterop.Geolocation
+@inject Wyldlife.Services.LocationService locationservice
+@using Wyldlife.Models
+@inject NavigationManager NavManager
 
 <h1>Home</h1>
+<div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        @Distance Miles
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(5); })">5 Miles</a>
+        <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(10); })">10 Miles</a>
+        <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(25); })">25 Miles</a>
+        <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(50); })">50 Miles</a>
+        <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(100); })">100 Miles</a>
 
-Welcome to Wyldlife
+    </div>
+</div>
 
 
+<br />
+<br />
+@for (int i = 0; i < locations.Count; i++)
+{
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card h-100" style="width: 75%">
+                <div class="card-body">
+                    <h5 class="card-title">@locations[i].Title</h5>
+                    <p class="card-text">@locations[i].Description</p>
+                    <a href="/Location/@locations[i].Id" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+        @if (i + 1 < locations.Count)
+        {
+            i++;
+            <div class="col-sm-6">
+                <div class="card h-100" style="width: 75%">
+                    <div class="card-body">
+                        <h5 class="card-title">@locations[i].Title</h5>
+                        <p class="card-text">@locations[i].Description</p>
+                        <a href="/Location/@locations[i].Id" class="stretched-link"></a>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+    <br />
+}
+
+
+
+@code{
+
+    public List<Location> locations = new List<Location>();
+
+    [Parameter]
+    public int? Distance { get; set; }
+
+    [Parameter]
+    public string query { get; set; }
+
+    Tuple<double, double> coords { get; set; }
+
+    private WindowNavigatorGeolocation geolocationWrapper;
+    private GeolocationPosition currentPosition;
+
+    protected override async Task OnAfterRenderAsync(bool firstrender)
+    {
+        if (firstrender)
+        {
+            var window = await jsRuntime.Window();
+            var navigator = await window.Navigator();
+            geolocationWrapper = navigator.Geolocation;
+            await GetLocation();
+            StateHasChanged();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Distance = Distance ?? 5;
+        query = query ?? string.Empty;
+        coords = Tuple.Create(0.0, 0.0);
+    }
+
+    public async Task GetLocation()
+    {
+        currentPosition = (await geolocationWrapper.GetCurrentPosition(new PositionOptions()
+        {
+            EnableHighAccuracy = true,
+            MaximumAgeTimeSpan = TimeSpan.FromHours(1),
+            TimeoutTimeSpan = TimeSpan.FromMinutes(1)
+
+        })).Location;
+        coords = Tuple.Create(currentPosition.Coords.Latitude, currentPosition.Coords.Longitude);
+        locations = locationservice.GetLocationsByDistance(coords, Distance.GetValueOrDefault());
+    }
+
+    public void ChangeDistance(int x)
+    {
+        Distance = x;
+        locations = locationservice.GetLocationsByDistance(coords, Distance.GetValueOrDefault());
+    }
+
+}

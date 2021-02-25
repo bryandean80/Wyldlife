@@ -6,7 +6,8 @@
 @page "/AddLocation"
 @inject NavigationManager NavManager
 
-
+<AuthorizeView>
+    <Authorized>
 <h1>Add New Location</h1>
 
 <p>Title</p>
@@ -36,12 +37,16 @@
 
 
 <button class="btn btn-primary" @onclick="Submit">Submit</button>
+        </Authorized>
+    <NotAuthorized>
+        <div>You need an account to access this page. <a href="/Identity/Account/Register">Make an Account</a> or <a href="/Identity/Account/Login">Login</a></div>
+    </NotAuthorized>
+</AuthorizeView>
 
 
 
 
 @code {
-    private int currentCount = 0;
     string title { get; set; }
     string description { get; set; }
     string notes { get; set; }
