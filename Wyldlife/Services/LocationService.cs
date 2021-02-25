@@ -125,6 +125,30 @@ namespace Wyldlife.Services
             }
             return locations;
         }
+
+        public List<Location> GetLocationsBySearch(string query)
+        {
+            List<Location> locations = new List<Location>();
+            var command = Connection.CreateCommand();
+            command.CommandText = @"SELECT id,title,lat,long,descrip,note
+                                    FROM dbo.Locations
+                                    WHERE LOWER(title) LIKE LOWER(%@query%);";
+            command.Parameters.AddWithValue("@query", query);
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var loc = new Location();
+                    loc.Id = Guid.Parse(reader.GetString(0));
+                    loc.Title = reader.GetString(1);
+                    loc.Coords = new Tuple<double, double>(reader.GetDouble(2), reader.GetDouble(3));
+                    loc.Description = reader.GetString(4);
+                    loc.Notes = reader.GetString(5);
+                    locations.Add(loc);
+                }
+            }
+            return locations;
+        }
     }
 
     
