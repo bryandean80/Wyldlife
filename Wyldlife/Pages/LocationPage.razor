@@ -2,6 +2,8 @@
 @inject IJSRuntime jsRuntime
 @using Wyldlife.Models
 @inject Wyldlife.Services.LocationService locationservice
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <h3>@locationservice.GetLocations().First(x => x.Id == locationid).Title </h3>
 <p>Description</p>
@@ -15,7 +17,22 @@
 </div>
 <br />
 
-<button class="btn btn-primary" @onclick="OpenLocInMaps">Open Location in Google Maps</button><br />
+<button class="btn btn-primary" @onclick="OpenLocInMaps">Open Location in Google Maps</button>
+<br />
+<br />
+@for (int i = 0; i < 5; i++)
+{
+    if (i < rating)
+    {
+        <span class="fa fa-star checked"></span>
+    }
+    else
+    {
+        <span class="fa fa-star"></span>
+    }
+}
+<p>@numratings ratings</p>
+<br />
 <p>
     Posted By: @locationservice.GetLocations().First(x => x.Id == locationid).Author
 </p>
@@ -23,6 +40,9 @@
 @code {
     [Parameter]
     public Guid locationid { get; set; }
+    public int numratings { get; set; }
+    public string currentuser { get; set; }
+    public int rating { get; set; }
 
     public async Task OpenLocInMaps()
     {
@@ -30,5 +50,19 @@
         string lon = locationservice.GetLocations().First(x => x.Id == locationid).Coords.Item2.ToString();
         string url = "https://www.google.com/maps/search/?api=1&query=" + lat + "," + lon;
         await jsRuntime.InvokeAsync<object>("open", url, "_blank");
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        rating = locationservice.GetRating(locationid).Item1;
+        numratings = locationservice.GetRating(locationid).Item2;
+    }
+
+    private async Task GetCurrentUser()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        currentuser = user.Identity.Name;
     }
 }

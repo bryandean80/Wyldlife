@@ -11,11 +11,11 @@
 
 <h1>Home</h1>
 
-<form class="form-inline">
+<div class="form-inline">
     <label class="my-1 mr-2" for="distancelabel">Show me locations within: </label>
     <div class="dropdown">
         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            @distnacedropdown Miles
+            @distancedropdown Miles
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
             <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(5); })">5 Miles</a>
@@ -30,10 +30,10 @@
     </div>
     <div class="form-check mb-2 mr-sm-2" style="padding-left:10px; padding-top:10px">
         <input class="form-control mr-sm-2" style="padding-left:5px" type="search" placeholder="Search by location name" aria-label="Search" @bind="query">
-        <button class="btn btn-outline-success my-2 my-sm-0"  type="submit" @onclick="search">Search</button>
+        <button class="btn btn-outline-success my-2 my-sm-0" @onclick="search">Search</button>
     </div>
 
-</form>
+</div>
 
 
 <br />
@@ -85,7 +85,7 @@
     private WindowNavigatorGeolocation geolocationWrapper;
     private GeolocationPosition currentPosition;
 
-    public string distnacedropdown { get; set; }
+    public string distancedropdown { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstrender)
     {
@@ -103,7 +103,7 @@
     {
         base.OnInitialized();
         Distance = Distance ?? 5;
-        distnacedropdown = "5";
+        distancedropdown = "5";
         query = query ?? string.Empty;
         coords = Tuple.Create(0.0, 0.0);
     }
@@ -126,19 +126,26 @@
         if(x==1)
         {
             locations = locationservice.GetLocations();
-            distnacedropdown = "Unlimited";
+            distancedropdown = "Unlimited";
         }
         else
         {
             Distance = x;
-            distnacedropdown = x.ToString();
+            distancedropdown = x.ToString();
             locations = locationservice.GetLocationsByDistance(coords, Distance.GetValueOrDefault());
         }
     }
 
     public void search()
     {
-        locations = locationservice.GetLocationsBySearch(query);
+        if(distancedropdown == "Unlimited")
+        {
+            locations = locationservice.GetLocationsBySearch(query);
+        }
+        else
+        {
+            locations = locationservice.GetLocationsBySearch(query, coords, Distance.GetValueOrDefault());
+        }
         query = string.Empty;
     }
 
