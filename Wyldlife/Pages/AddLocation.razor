@@ -5,39 +5,42 @@
 @inject Wyldlife.Services.LocationService locationservice
 @page "/AddLocation"
 @inject NavigationManager NavManager
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <AuthorizeView>
     <Authorized>
-<h1>Add New Location</h1>
+        <h1>Add New Location</h1>
 
-<p>Title</p>
-<div class="input-group" style="width: 75%">
-    <input class="form-control" @bind="title" />
-</div>
-<br />
-<p>Coordinates (In Decimal)</p>
-<div class="input-group form-inline" style="width: 75%">
-    <span>Latitude: </span>
-    <input class="form-control" @bind="latitude" />
-    <span>Longitude: </span>
-    <input class="form-control" @bind="longitude" />
-    <button class="btn btn-primary" @onclick="GetLocation">Use Current Location</button>
-</div>
-<br />
-<p>Description (Optional)</p>
-<div class="input-group" style="width: 75%">
-    <textarea style="width: 75%" class="form-control" @bind="description"></textarea>
-</div>
-<br />
-<p>Notes (Optional)</p>
-<div class="input-group" style="width: 75%">
-    <textarea style="width: 75%" class="form-control" @bind="notes"></textarea>
-</div>
-<br />
+        <p>Title</p>
+        <div class="input-group" style="width: 75%">
+            <input class="form-control" @bind="title" />
+        </div>
+        <br />
+        <p>Coordinates (In Decimal)</p>
+        <div class="input-group form-inline" style="width: 75%">
+            <span>Latitude: </span>
+            <input class="form-control" @bind="latitude" />
+            <span>Longitude: </span>
+            <input class="form-control" @bind="longitude" />
+            <button class="btn btn-primary" @onclick="GetLocation">Use Current Location</button>
+        </div>
+        <br />
+        <p>Description (Optional)</p>
+        <div class="input-group" style="width: 75%">
+            <textarea maxlength="140" style="width: 75%" class="form-control" @bind="description"></textarea>
+        </div>
+        <br />
+        <p>Notes (Optional)</p>
+        <div class="input-group" style="width: 75%">
+            <textarea maxlength="140" style="width: 75%" class="form-control" @bind="notes"></textarea>
+        </div>
+        <br />
 
 
-<button class="btn btn-primary" @onclick="Submit">Submit</button>
-        </Authorized>
+        <button class="btn btn-primary" @onclick="Submit">Submit</button>
+    </Authorized>
     <NotAuthorized>
         <div>You need an account to access this page. <a href="/Identity/Account/Register">Make an Account</a> or <a href="/Identity/Account/Login">Login</a></div>
     </NotAuthorized>
@@ -47,6 +50,7 @@
 
 
 @code {
+    string author { get; set; }
     string title { get; set; }
     string description { get; set; }
     string notes { get; set; }
@@ -63,6 +67,7 @@
         var window = await jsRuntime.Window();
         var navigator = await window.Navigator();
         geolocationWrapper = navigator.Geolocation;
+        await GetCurrentUser();
     }
 
     public async Task GetLocation()
@@ -85,6 +90,7 @@
         location.Coords = Tuple.Create(latitude, longitude);
         location.Description = description;
         location.Notes = notes;
+        location.Author = author;
 
         locationservice.AddLocation(location);
 
@@ -96,5 +102,11 @@
         NavManager.NavigateTo("/Location/" + location.Id.ToString());
     }
 
+    private async Task GetCurrentUser()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        author = user.Identity.Name;
+    }
 
 }

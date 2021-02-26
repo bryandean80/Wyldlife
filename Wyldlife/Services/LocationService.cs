@@ -54,7 +54,7 @@ namespace Wyldlife.Services
             var command = Connection.CreateCommand();
             command.CommandText =
                 @"
-                INSERT INTO dbo.Locations (id, title, lat, long, descrip, note) VALUES(
+                INSERT INTO dbo.Locations (id, title, author, lat, long, descrip, note) VALUES(
                     @id,
                     @title,
                     @author,

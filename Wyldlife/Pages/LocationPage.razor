@@ -15,7 +15,11 @@
 </div>
 <br />
 
-<button class="btn btn-primary" @onclick="OpenLocInMaps">Open Location in Google Maps</button>
+<button class="btn btn-primary" @onclick="OpenLocInMaps">Open Location in Google Maps</button><br />
+<p>
+    Posted By: @locationservice.GetLocations().First(x => x.Id == locationid).Author
+</p>
+<br />
 @code {
     [Parameter]
     public Guid locationid { get; set; }
