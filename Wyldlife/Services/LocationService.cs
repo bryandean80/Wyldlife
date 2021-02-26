@@ -289,7 +289,7 @@ namespace Wyldlife.Services
         public void AddReview(Review review)
         {
             var command = Connection.CreateCommand();
-            command.CommandText = @"INSERT INTO dbo.Reviews
+            command.CommandText = @"REPLACE INTO dbo.Reviews
                                     (locationId, author, rating, reviewText)
                                     VALUES(
                                     @locationId, @author, @rating, @reviewText);";
