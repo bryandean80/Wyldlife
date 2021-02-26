@@ -243,7 +243,7 @@ namespace Wyldlife.Services
                     numRates = reader.GetInt32(1);
                     if (numRates == 0)
                     {
-                        rating = 5;
+                        rating = 0;
                     }
                     else
                     {
