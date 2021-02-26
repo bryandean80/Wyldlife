@@ -135,16 +135,24 @@ namespace Wyldlife.Services
         /// Gets locations matching a given text query.
         /// </summary>
         /// <param name="query">The query to search the database for.</param>
+        /// <param name="coords">Current position.</param>
+        /// <param name="radius">Searching radius</param>
         /// <returns>A list of locations matching the query.</returns>
-        public List<Location> GetLocationsBySearch(string query)
+        public List<Location> GetLocationsBySearch(string query, Tuple<double,double> coords, int radius)
         {
             List<Location> locations = new List<Location>();
             var command = Connection.CreateCommand();
             command.CommandText = @"SELECT id,title,author,lat,long,descrip,note
                                     FROM dbo.Locations
-                                    WHERE LOWER(title) LIKE LOWER(@query);";
+                                    WHERE LOWER(title) LIKE LOWER(@query)
+                                    AND lat BETWEEN @minlat AND @maxlat
+                                    AND long BETWEEN @minlong AND @maxlong;";
             query = "%" + query + "%";
             command.Parameters.AddWithValue("@query", query);
+            command.Parameters.AddWithValue("@minlat", (coords.Item1 - (Convert.ToDouble(radius) / Convert.ToDouble(69))));
+            command.Parameters.AddWithValue("@maxlat", (coords.Item1 + (Convert.ToDouble(radius) / Convert.ToDouble(69))));
+            command.Parameters.AddWithValue("@minlong", (coords.Item2 - (Convert.ToDouble(radius) / Convert.ToDouble(54.6))));
+            command.Parameters.AddWithValue("@maxlong", (coords.Item2 + (Convert.ToDouble(radius) / Convert.ToDouble(54.6))));
             using (var reader = command.ExecuteReader())
             {
                 while (reader.Read())
