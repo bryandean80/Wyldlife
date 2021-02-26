@@ -55,14 +55,7 @@ namespace Wyldlife.Services
             command.CommandText =
                 @"
                 INSERT INTO dbo.Locations (id, title, author, lat, long, descrip, note) VALUES(
-                    @id,
-                    @title,
-                    @author,
-                    @lat,
-                    @long,
-                    @descrip,
-                    @note
-                    );";
+                    @id, @title, @author, @lat, @long, @descrip, @note);";
             command.Parameters.AddWithValue("@id", loc.Id);
             command.Parameters.AddWithValue("@title", loc.Title);
             command.Parameters.AddWithValue("@author", loc.Author);
@@ -239,7 +232,7 @@ namespace Wyldlife.Services
         {
             int rating, numRates;
             var command = Connection.CreateCommand();
-            command.CommandText = @"SELECT AVG(rating), COUNT(rating) FROM dbo.Ratings
+            command.CommandText = @"SELECT AVG(rating), COUNT(rating) FROM dbo.Reviews
                                     WHERE locationId=@id;";
             command.Parameters.AddWithValue("@id", locationId);
             using (var reader = command.ExecuteReader())
