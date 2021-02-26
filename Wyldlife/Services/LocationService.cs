@@ -131,20 +131,27 @@ namespace Wyldlife.Services
             return locations;
         }
 
+        /// <summary>
+        /// Gets locations matching a given text query.
+        /// </summary>
+        /// <param name="query">The query to search the database for.</param>
+        /// <returns>A list of locations matching the query.</returns>
         public List<Location> GetLocationsBySearch(string query)
         {
             List<Location> locations = new List<Location>();
             var command = Connection.CreateCommand();
             command.CommandText = @"SELECT id,title,author,lat,long,descrip,note
                                     FROM dbo.Locations
-                                    WHERE LOWER(title) LIKE LOWER(%@query%);";
+                                    WHERE LOWER(title) LIKE LOWER(@query);";
+            query = "%" + query + "%";
             command.Parameters.AddWithValue("@query", query);
             using (var reader = command.ExecuteReader())
             {
                 while (reader.Read())
                 {
+                    Console.WriteLine(reader.GetString(1));
                     var loc = new Location();
-                    loc.Id = Guid.Parse(reader.GetString(0));
+                    loc.Id = reader.GetGuid(0);
                     loc.Title = reader.GetString(1);
                     loc.Author = reader.GetString(2);
                     loc.Coords = new Tuple<double, double>(reader.GetDouble(3), reader.GetDouble(4));
@@ -156,13 +163,18 @@ namespace Wyldlife.Services
             return locations;
         }
 
-        public Tuple<int,int> GetLocationRating(Guid id)
+        /// <summary>
+        /// Gets the rating of the given location.
+        /// </summary>
+        /// <param name="locationId">The location ID.</param>
+        /// <returns>An integer out of 5 representing the rating.</returns>
+        public Tuple<int,int> GetRating(Guid locationId)
         {
             int rating, numRates;
             var command = Connection.CreateCommand();
             command.CommandText = @"SELECT AVG(rating), COUNT(rating) FROM dbo.Ratings
                                     WHERE locationId=@id;";
-            command.Parameters.AddWithValue("@id", id);
+            command.Parameters.AddWithValue("@id", locationId);
             using (var reader = command.ExecuteReader())
             {
                 numRates = reader.GetInt32(1);
@@ -178,12 +190,16 @@ namespace Wyldlife.Services
 
             return new Tuple<int, int>(rating, numRates);
         }
-
-        public List<Review> GetLocationReviews(Guid locationId)
+        /// <summary>
+        /// Get all the reviews for a given location.
+        /// </summary>
+        /// <param name="locationId">The location ID.</param>
+        /// <returns>A list of Reviews from the given location.</returns>
+        public List<Review> GetReviews(Guid locationId)
         {
             List<Review> reviews = new List<Review>();
             var command = Connection.CreateCommand();
-            command.CommandText = @"SELECT id, locationId, author, rating, reviewText
+            command.CommandText = @"SELECT locationId, author, rating, reviewText
                                     FROM dbo.Reviews
                                     WHERE locationId=@id;";
             command.Parameters.AddWithValue("@id", locationId);
@@ -192,7 +208,6 @@ namespace Wyldlife.Services
                 while (reader.Read())
                 {
                     var review = new Review();
-                    review.Id = reader.GetGuid(0);
                     review.LocationId = reader.GetGuid(1);
                     review.Author = reader.GetString(2);
                     review.Rating = reader.GetInt16(3);
@@ -201,6 +216,30 @@ namespace Wyldlife.Services
                 }
             }
             return reviews;
+        }
+
+        /// <summary>
+        /// Add a review to the database.
+        /// </summary>
+        /// <param name="review">The review to add to the database.</param>
+        public void AddReview(Review review)
+        {
+            var command = Connection.CreateCommand();
+            command.CommandText = @"INSERT INTO dbo.Reviews
+                                    (locationId, author, rating, reviewText)
+                                    VALUES(
+                                    @id, @locationId, @author, @rating, @reviewText);";
+            command.Parameters.AddWithValue("@author", review.Author);
+            command.Parameters.AddWithValue("@rating", review.Rating);
+            if(review.ReviewText == null)
+            {
+                review.ReviewText = "N/A";
+            }
+            else
+            {
+                command.Parameters.AddWithValue("@reviewText", review.ReviewText);
+            }
+            command.ExecuteNonQuery();
         }
     }
 

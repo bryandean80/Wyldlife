@@ -7,7 +7,6 @@ namespace Wyldlife.Models
 {
     public class Review
     {
-        public Guid Id { get; set; }
         public Guid LocationId { get; set; }
         public string Author { get; set; }
         public int Rating { get; set; }
