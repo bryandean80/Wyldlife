@@ -4,17 +4,24 @@
 @inject Wyldlife.Services.LocationService locationservice
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavManager
+
 
 <h3>@locationservice.GetLocations().First(x => x.Id == locationid).Title </h3>
-<p>Description</p>
-<div>
-    @locationservice.GetLocations().First(x => x.Id == locationid).Description
+<div class="card" style="width: 18rem;">
+    <div class="card-body">
+        <h5 class="card-title">Description</h5>
+        <p class="card-text">@locationservice.GetLocations().First(x => x.Id == locationid).Description</p>
+    </div>
 </div>
 <br />
-<p>Notes</p>
-<div>
-    @locationservice.GetLocations().First(x => x.Id == locationid).Notes
+<div class="card" style="width: 18rem;">
+    <div class="card-body">
+        <h5 class="card-title">Notes</h5>
+        <p class="card-text">@locationservice.GetLocations().First(x => x.Id == locationid).Notes</p>
+    </div>
 </div>
+<br />
 <br />
 
 <button class="btn btn-primary" @onclick="OpenLocInMaps">Open Location in Google Maps</button>
@@ -31,18 +38,100 @@
         <span class="fa fa-star"></span>
     }
 }
-<p>@numratings ratings</p>
+<label>@numratings ratings</label>
+<br />
+<AuthorizeView>
+    <Authorized>
+        <!-- Button trigger modal -->
+        @if (locationservice.GetReviews(locationid).Exists(x => x.Author == currentuser))
+        {
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+                Change your review
+            </button>
+        }
+        else{
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+                Add a Review
+            </button>
+        }
+        
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">Add a Review</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Rating</p>
+                        <div class="rating">
+                            <input type="radio" name="rating" value="5" id="5"><label for="5" @onclick="(e => review.Rating = 5)">☆</label>
+                            <input type="radio" name="rating" value="4" id="4"><label for="4" @onclick="(e => review.Rating = 4)">☆</label>
+                            <input type="radio" name="rating" value="3" id="3"><label for="3" @onclick="(e => review.Rating = 3)">☆</label>
+                            <input type="radio" name="rating" value="2" id="2"><label for="2" @onclick="(e => review.Rating = 2)">☆</label>
+                            <input type="radio" name="rating" value="1" id="1"><label for="1" @onclick="(e => review.Rating = 1)">☆</label>
+                        </div>
+                        <p>Review (Optional)</p>
+                        <div class="input-group">
+                            <textarea maxlength="140" class="form-control" @bind="review.ReviewText"></textarea>
+                        </div>
+                    </div>
+                    <form class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" data-dismiss="modal" @onclick="addReview">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div>To add a review <a href="/Identity/Account/Register">Make an Account</a> or <a href="/Identity/Account/Login">Login</a></div>
+    </NotAuthorized>
+</AuthorizeView>
+<br />
 <br />
 <p>
     Posted By: @locationservice.GetLocations().First(x => x.Id == locationid).Author
 </p>
 <br />
+<h3>Reviews</h3>
+@foreach (Review rev in locationservice.GetReviews(locationid))
+{
+    if(rev.ReviewText == string.Empty)
+    {
+        continue;
+    }
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">@rev.Author</h5>
+            @for (int i = 0; i < 5; i++)
+            {
+                if (i < rev.Rating)
+                {
+                    <span class="fa fa-star checked"></span>
+                }
+                else
+                {
+                    <span class="fa fa-star"></span>
+                }
+            }
+            <p class="card-text">@rev.ReviewText</p>
+        </div>
+    </div>
+    <br />
+}
+
 @code {
     [Parameter]
     public Guid locationid { get; set; }
     public int numratings { get; set; }
     public string currentuser { get; set; }
     public int rating { get; set; }
+    public Review review = new Review();
 
     public async Task OpenLocInMaps()
     {
@@ -52,9 +141,19 @@
         await jsRuntime.InvokeAsync<object>("open", url, "_blank");
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCurrentUser();
+    }
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        GetRatings();
+    }
+
+    public void GetRatings()
+    {
         rating = locationservice.GetRating(locationid).Item1;
         numratings = locationservice.GetRating(locationid).Item2;
     }
@@ -64,5 +163,13 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         currentuser = user.Identity.Name;
+    }
+
+    public void addReview()
+    {
+        review.Author = currentuser;
+        review.LocationId = locationid;
+        locationservice.AddReview(review);
+        GetRatings();
     }
 }

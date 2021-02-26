@@ -15,10 +15,48 @@
     <link rel="stylesheet" href="~/css/bootstrap-dark/dist/css/bootstrap-dark.min.css" />
     <link href="~/css/site.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
     <style>
-    .checked {
-    color: orange;
-    }
+        .checked {
+            color: orange;
+        }
+
+        .rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+            .rating > input {
+                display: none
+            }
+
+            .rating > label {
+                position: relative;
+                width: 1em;
+                font-size: 30px;
+                color: #FFD600;
+                cursor: pointer
+            }
+
+                .rating > label::before {
+                    content: "\2605";
+                    position: absolute;
+                    opacity: 0
+                }
+
+                .rating > label:hover:before,
+                .rating > label:hover ~ label:before {
+                    opacity: 1 !important
+                }
+
+            .rating > input:checked ~ label:before {
+                opacity: 1
+            }
+
+            .rating:hover > input:checked ~ label:before {
+                opacity: 0.4
+            }
     </style>
 </head>
 <body>
@@ -42,6 +80,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script src="_content/BrowserInterop/scripts.js"></script>
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
 
 </body>
 </html>

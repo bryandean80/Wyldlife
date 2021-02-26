@@ -307,7 +307,7 @@ namespace Wyldlife.Services
                                                 @locationId,
                                                 @author,
                                                 @rating,
-                                                @reviewTexta)
+                                                @reviewText)
                                     END
                                     COMMIT tran";
             command.Parameters.AddWithValue("@locationId", review.LocationId);
