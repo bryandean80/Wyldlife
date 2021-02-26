@@ -231,20 +231,24 @@ namespace Wyldlife.Services
         public Tuple<int,int> GetRating(Guid locationId)
         {
             int rating, numRates;
+            rating = 5;
+            numRates = 0;
             var command = Connection.CreateCommand();
             command.CommandText = @"SELECT AVG(rating), COUNT(rating) FROM dbo.Reviews
                                     WHERE locationId=@id;";
             command.Parameters.AddWithValue("@id", locationId);
             using (var reader = command.ExecuteReader())
             {
-                numRates = reader.GetInt32(1);
-                if(numRates == 0)
-                {
-                    rating = 5;
-                }
-                else
-                {
-                    rating = reader.GetInt32(0);
+                while (reader.Read()) {
+                    numRates = reader.GetInt32(1);
+                    if (numRates == 0)
+                    {
+                        rating = 5;
+                    }
+                    else
+                    {
+                        rating = reader.GetInt32(0);
+                    }
                 }
             }
 
