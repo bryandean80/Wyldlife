@@ -293,6 +293,7 @@ namespace Wyldlife.Services
                                     (locationId, author, rating, reviewText)
                                     VALUES(
                                     @locationId, @author, @rating, @reviewText);";
+            command.Parameters.AddWithValue("@locationId", review.LocationId);
             command.Parameters.AddWithValue("@author", review.Author);
             command.Parameters.AddWithValue("@rating", review.Rating);
             if(review.ReviewText == null)
