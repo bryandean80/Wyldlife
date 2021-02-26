@@ -289,10 +289,27 @@ namespace Wyldlife.Services
         public void AddReview(Review review)
         {
             var command = Connection.CreateCommand();
-            command.CommandText = @"REPLACE INTO dbo.Reviews
-                                    (locationId, author, rating, reviewText)
-                                    VALUES(
-                                    @locationId, @author, @rating, @reviewText);";
+            command.CommandText = @"BEGIN tran
+                                        IF EXISTS (SELECT * FROM dbo.Reviews WITH (updlock,serializable)
+                                            WHERE locationId=@locationId
+                                             AND author=@author)
+                                    BEGIN
+                                        UPDATE dbo.Reviews
+                                            SET rating=@rating,
+                                                reviewText=@reviewText
+                                            WHERE locationId=@locationId
+                                            AND author=@author
+                                    END
+                                    ELSE
+                                    BEGIN
+                                        INSERT INTO dbo.Reviews(locationId, author,rating,reviewText)
+                                            VALUES(
+                                                @locationId,
+                                                @author,
+                                                @rating,
+                                                @reviewTexta)
+                                    END
+                                    COMMIT tran";
             command.Parameters.AddWithValue("@locationId", review.LocationId);
             command.Parameters.AddWithValue("@author", review.Author);
             command.Parameters.AddWithValue("@rating", review.Rating);
@@ -300,10 +317,7 @@ namespace Wyldlife.Services
             {
                 review.ReviewText = "N/A";
             }
-            else
-            {
-                command.Parameters.AddWithValue("@reviewText", review.ReviewText);
-            }
+            command.Parameters.AddWithValue("@reviewText", review.ReviewText);
             command.ExecuteNonQuery();
         }
 
