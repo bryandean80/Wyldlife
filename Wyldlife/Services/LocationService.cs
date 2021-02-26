@@ -85,13 +85,14 @@ namespace Wyldlife.Services
         /// Deletes a location from the database.
         /// </summary>
         /// <param name="uuid">ID of the location to remove.</param>
-        public void deleteLocation(Guid uuid)
+        public void DeleteLocation(Guid uuid)
         {
             var command = Connection.CreateCommand();
             command.CommandText =
                 @"DELETE FROM dbo.Locations
                     WHERE id=@uuid;";
             command.Parameters.AddWithValue("@uuid", uuid.ToString());
+            command.ExecuteNonQuery();
         }
 
         /// <summary>
@@ -132,12 +133,12 @@ namespace Wyldlife.Services
         }
 
         /// <summary>
-        /// Gets locations matching a given text query.
+        /// Gets locations matching a given text query, location, and radius.
         /// </summary>
         /// <param name="query">The query to search the database for.</param>
         /// <param name="coords">Current position.</param>
         /// <param name="radius">Searching radius</param>
-        /// <returns>A list of locations matching the query.</returns>
+        /// <returns>A list of locations matching the query and location constraints..</returns>
         public List<Location> GetLocationsBySearch(string query, Tuple<double,double> coords, int radius)
         {
             List<Location> locations = new List<Location>();
@@ -169,6 +170,64 @@ namespace Wyldlife.Services
                 }
             }
             return locations;
+        }
+
+        /// <summary>
+        /// Gets locations from the database that match the given query.
+        /// </summary>
+        /// <param name="query">The search query.</param>
+        /// <returns>A list of Locations matching the search query.</returns>
+        public List<Location> GetLocationsBySearch(string query)
+        {
+            List<Location> locations = new List<Location>();
+            var command = Connection.CreateCommand();
+            command.CommandText = @"SELECT id,title,author,lat,long,descrip,note
+                                    FROM dbo.Locations
+                                    WHERE LOWER(title) LIKE LOWER(@query);";
+            query = "%" + query + "%";
+            command.Parameters.AddWithValue("@query", query);
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    Console.WriteLine(reader.GetString(1));
+                    var loc = new Location();
+                    loc.Id = reader.GetGuid(0);
+                    loc.Title = reader.GetString(1);
+                    loc.Author = reader.GetString(2);
+                    loc.Coords = new Tuple<double, double>(reader.GetDouble(3), reader.GetDouble(4));
+                    loc.Description = reader.GetString(5);
+                    loc.Notes = reader.GetString(6);
+                    locations.Add(loc);
+                }
+            }
+            return locations;
+        }
+
+        /// <summary>
+        /// Edit a location in the database.
+        /// Uses the UUID from the location object to determine which location to edit.
+        /// </summary>
+        /// <param name="location">Newly edited location object.</param>
+        public void EditLocation(Location location)
+        {
+            var command = Connection.CreateCommand();
+            command.CommandText = @"UPDATE dbo.Locations
+                                    SET title=@title, lat=@lat, long=@long, descrip=@descrip, note=@note
+                                    WHERE id=@id";
+            command.Parameters.AddWithValue("@title", location.Title);
+            command.Parameters.AddWithValue("@lat", location.Coords.Item1);
+            command.Parameters.AddWithValue("@long", location.Coords.Item2);
+            if(location.Description == null)
+            {
+                location.Description = "N/A";
+            }
+            if(location.Notes == null)
+            {
+                location.Notes = "N/A";
+            }
+            command.Parameters.AddWithValue("@descrip", location.Description);
+            command.Parameters.AddWithValue("@note", location.Notes);
         }
 
         /// <summary>
@@ -236,7 +295,7 @@ namespace Wyldlife.Services
             command.CommandText = @"INSERT INTO dbo.Reviews
                                     (locationId, author, rating, reviewText)
                                     VALUES(
-                                    @id, @locationId, @author, @rating, @reviewText);";
+                                    @locationId, @author, @rating, @reviewText);";
             command.Parameters.AddWithValue("@author", review.Author);
             command.Parameters.AddWithValue("@rating", review.Rating);
             if(review.ReviewText == null)
@@ -248,6 +307,38 @@ namespace Wyldlife.Services
                 command.Parameters.AddWithValue("@reviewText", review.ReviewText);
             }
             command.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Deletes the specified review from the database.
+        /// </summary>
+        /// <param name="locationId">The location of the review.</param>
+        /// <param name="author">The author of the review.</param>
+        public void DeleteReview(Guid locationId, string author)
+        {
+            var command = Connection.CreateCommand();
+            command.CommandText = @"DELETE FROM dbo.Reviews
+                                    WHERE author=@author AND locationId=@locationId;";
+            command.Parameters.AddWithValue("@author", author);
+            command.Parameters.AddWithValue("@locationId", locationId);
+            command.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        /// Edits a review on the server.
+        /// The review to edit is specified by locationID and Author of the supplied review.
+        /// </summary>
+        /// <param name="review">Edited review object.</param>
+        public void EditReview(Review review)
+        {
+            var command = Connection.CreateCommand();
+            command.CommandText = @"UPDATE dbo.Reviews
+                                    SET rating=@rating, reviewText=@reviewText
+                                    WHERE locationId=@locationId AND author=@author;";
+            command.Parameters.AddWithValue("@rating", review.Rating);
+            command.Parameters.AddWithValue("@reviewText", review.ReviewText);
+            command.Parameters.AddWithValue("@locationId", review.LocationId);
+            command.Parameters.AddWithValue("@author", review.Author);
         }
     }
 
