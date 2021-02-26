@@ -272,10 +272,10 @@ namespace Wyldlife.Services
                 while (reader.Read())
                 {
                     var review = new Review();
-                    review.LocationId = reader.GetGuid(1);
-                    review.Author = reader.GetString(2);
-                    review.Rating = reader.GetInt16(3);
-                    review.ReviewText = reader.GetString(4);
+                    review.LocationId = reader.GetGuid(0);
+                    review.Author = reader.GetString(1);
+                    review.Rating = reader.GetByte(2);
+                    review.ReviewText = reader.GetString(3);
                     reviews.Add(review);
                 }
             }
