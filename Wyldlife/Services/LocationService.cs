@@ -283,9 +283,10 @@ namespace Wyldlife.Services
         }
 
         /// <summary>
-        /// Add a review to the database.
+        /// Adds or edits a review in the database.
+        /// If a review already exists with the author at the location, it will replace it.
         /// </summary>
-        /// <param name="review">The review to add to the database.</param>
+        /// <param name="review">The review to add or edit to the database.</param>
         public void AddReview(Review review)
         {
             var command = Connection.CreateCommand();
