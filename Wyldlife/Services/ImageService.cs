@@ -26,7 +26,9 @@ namespace Wyldlife.Services
                     VALUES(@locationId, @author, @img);";
             command.Parameters.AddWithValue("@locationId", locationId);
             command.Parameters.AddWithValue("@author", author);
-            command.Parameters.AddWithValue("@img", image);
+            //command.Parameters.AddWithValue("@img", image);
+            command.Parameters.Add("@img", System.Data.SqlDbType.Binary);
+            command.Parameters["@img"].Value = image;
             command.ExecuteNonQuery();
         }
 
