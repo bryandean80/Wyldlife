@@ -25,9 +25,7 @@ CREATE TABLE dbo.Images(
 	imageId uniqueidentifier 
 		DEFAULT newid() NOT NULL,
 	author VARCHAR(140) NOT NULL,
-	img VARBINARY(5002),
-	isStory BIT NOT NULL,
-		DEFAULT 0,
+	img VARBINARY(max),
 	uploaded DATETIME
 		DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	PRIMARY KEY (locationId, imageId),
