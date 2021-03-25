@@ -11,7 +11,7 @@
 @using System.Threading;
 @using System.Threading.Tasks;
 @using System.Text
-
+@inject NavigationManager NavManager
 
 <h3>@locationservice.GetLocations().First(x => x.Id == locationid).Title </h3>
 
@@ -87,6 +87,7 @@
             <label>
                 Add an Image:
                 <InputFile OnChange="@LoadFiles" />
+                <button class="btn btn-secondary" @onclick="UploadImage">Upload Image</button>
             </label>
         </p>
 
@@ -95,6 +96,7 @@
         @if (isLoading)
         {
         <p>Loading...</p>}
+        
     </Authorized>
 </AuthorizeView>
 
@@ -102,10 +104,11 @@
 {
     if (i < rating)
     {
-<span class="fa fa-star checked"></span> }
-else
-{
-<span class="fa fa-star"></span>}
+        <span class="fa fa-star checked"></span> }
+    else
+    {
+    <span class="fa fa-star"></span>
+    }
 }
 <label> @numratings ratings</label>
 <br />
@@ -191,13 +194,14 @@ else
                 <br />}
 
 @code { [Parameter]
-    public Guid locationid { get; set; }
+        public Guid locationid { get; set; }
 
     public int numratings { get; set; }
     public string currentuser { get; set; }
     public int rating { get; set; }
     public Review review = new Review();
     List<byte[]> images = new List<byte[]>();
+    byte[] barray;
 
     public async Task OpenLocInMaps()
     {
@@ -262,9 +266,7 @@ else
                 using (var memoryStream = new MemoryStream())
                 {
                     await file.OpenReadStream(maxFileSize).CopyToAsync(memoryStream);
-                    byte[] barray = memoryStream.ToArray();
-                    imageService.AddImage(locationid, currentuser, barray);
-                    
+                    barray = memoryStream.ToArray();
                 }
             }
         }
@@ -274,4 +276,16 @@ else
         }
 
         isLoading = false;
-    } }
+    }
+
+    public void UploadImage()
+    {
+        if (barray != null)
+        {
+            imageService.AddImage(locationid, currentuser, barray);
+            images = imageService.getImages(locationid);
+            barray = null;
+            NavManager.NavigateTo("/Location/" + locationid, forceLoad: true);
+        }
+    }
+}
