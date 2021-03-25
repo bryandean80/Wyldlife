@@ -19,3 +19,18 @@ CREATE TABLE dbo.Reviews(
 	FOREIGN KEY (locationId)
 		REFERENCES dbo.Locations(id)
 );
+
+CREATE TABLE dbo.Images(
+	locationId uniqueidentifier NOT NULL,
+	imageId uniqueidentifier 
+		DEFAULT newid() NOT NULL,
+	author VARCHAR(140) NOT NULL,
+	img VARBINARY(5002),
+	isStory BIT NOT NULL,
+		DEFAULT 0,
+	uploaded DATETIME
+		DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	PRIMARY KEY (locationId, imageId),
+	FOREIGN KEY (locationId)
+		REFERENCES dbo.Locations(id)
+);
