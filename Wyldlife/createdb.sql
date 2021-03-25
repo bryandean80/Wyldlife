@@ -32,3 +32,13 @@ CREATE TABLE dbo.Images(
 	FOREIGN KEY (locationId)
 		REFERENCES dbo.Locations(id)
 );
+
+CREATE TABLE dbo.Maps(
+	locationId uniqueidentifier
+		DEFAULT newid() NOT NULL,
+	satellite VARBINARY(max) NOT NULL,
+	terrain VARBINARY(max) NOT NULL,
+	PRIMARY KEY (locationId),
+	FOREIGN KEY (locationId)
+		REFERENCES dbo.Locations(id)
+);

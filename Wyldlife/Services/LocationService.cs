@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Razor.Language.Extensions;
 using Microsoft.Data.SqlClient;
 using Wyldlife.Models;
+using Newtonsoft.Json;
+using System.IO;
+using Newtonsoft.Json.Linq;
 
 namespace Wyldlife.Services
 {
@@ -49,7 +53,7 @@ namespace Wyldlife.Services
         /// Adds a location to the database.
         /// </summary>
         /// <param name="loc">Location object to add.</param>
-        public void AddLocation(Location loc)
+        public async void AddLocation(Location loc)
         {
             var command = Connection.CreateCommand();
             command.CommandText =
@@ -71,6 +75,27 @@ namespace Wyldlife.Services
                 loc.Notes = "N/A";
             }
             command.Parameters.AddWithValue("@note", loc.Notes);
+            command.ExecuteNonQuery();
+
+            /**
+             * Generate Maps
+             **/
+            string configFile = File.ReadAllText("./config.json");
+            dynamic config = JObject.Parse(configFile);
+            var client = new HttpClient();
+            string mapType = "satellite-streets-v11";
+            string requestString = "https://api.mapbox.com/styles/v1/mapbox/"+ mapType + "/static/"
+                + loc.Coords.Item2 + "," + loc.Coords.Item1 + ",15,0/600x480?access_token=" + config.mapbox;
+            byte[] satelliteImage = await client.GetByteArrayAsync(requestString);
+            mapType = "outdoors-v11";
+            requestString = "https://api.mapbox.com/styles/v1/mapbox/" + mapType + "/static/"
+                + loc.Coords.Item2 + "," + loc.Coords.Item1 + ",15,0/600x480?access_token=" + config.mapbox;
+            byte[] terrainImage = await client.GetByteArrayAsync(requestString);
+
+            command.CommandText = "INSERT INTO dbo.Maps(locationId, satellite, terrain) VALUES(@locationId, @satellite, @terrain);";
+            command.Parameters.AddWithValue("@locationId", loc.Id);
+            command.Parameters.AddWithValue("@satellite", satelliteImage);
+            command.Parameters.AddWithValue("@terrain", terrainImage);
             command.ExecuteNonQuery();
         }
 

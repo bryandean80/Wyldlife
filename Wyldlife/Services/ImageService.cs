@@ -37,9 +37,34 @@ namespace Wyldlife.Services
         {
             List<byte[]> images = new List<byte[]>();
             var command = Connection.CreateCommand();
+
+            // Add satellite and terrain images
+            command.CommandText = @"SELECT satellite,terrain FROM dbo.Maps
+                                        WHERE locationId=@locationId;";
+            command.Parameters.AddWithValue("@locationId", locationId);
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var sourceStream = reader.GetStream(0);
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        sourceStream.CopyTo(memoryStream);
+                        images.Add(memoryStream.ToArray());
+                    }
+                    sourceStream = reader.GetStream(1);
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        sourceStream.CopyTo(memoryStream);
+                        images.Add(memoryStream.ToArray());
+                    }
+                }
+
+
+            }
             command.CommandText = @"SELECT img FROM dbo.Images
                                         WHERE locationId=@locationId";
-            command.Parameters.AddWithValue("@locationId", locationId);
+            
             using (var reader = command.ExecuteReader())
             {
                 while (reader.Read())
@@ -52,7 +77,8 @@ namespace Wyldlife.Services
                     }
                 }
             }
-                return images;
+
+            return images;
         }
     }
 
