@@ -20,6 +20,7 @@ namespace Wyldlife.Services
         }
         public void AddImage(Guid locationId, string author, byte[] image)
         {
+            var test = image.ToString();
             var command = Connection.CreateCommand();
             command.CommandText = @"
                 INSERT INTO dbo.Images (locationId, author, img)
@@ -36,7 +37,7 @@ namespace Wyldlife.Services
         {
             List<byte[]> images = new List<byte[]>();
             var command = Connection.CreateCommand();
-            command.CommandText = @"SELECT DATALENGTH(img) FROM dbo.Images
+            command.CommandText = @"SELECT img FROM dbo.Images
                                         WHERE locationId=@locationId";
             command.Parameters.AddWithValue("@locationId", locationId);
             using (var reader = command.ExecuteReader())

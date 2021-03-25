@@ -42,6 +42,7 @@ namespace Wyldlife
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             services.AddSingleton<WeatherForecastService>();
             services.AddTransient<LocationService>();
+            services.AddTransient<ImageService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
