@@ -16,8 +16,8 @@
 <h3>@locationservice.GetLocations().First(x => x.Id == locationid).Title </h3>
 
 
-<div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel" role="listbox" style=" max-width:35vw; height:45vh !important;">
-    <div class="carousel-inner" role="listbox" style=" max-width:35vw; height:45vh !important;">
+<div id="carouselExampleIndicators" class="carousel slide " data-ride="carousel" role="listbox"  style="width:500px; height:auto;">
+    <div class="carousel-inner" role="listbox" style=" width:500px; height:auto; max-height:700px">
         <ol class="carousel-indicators">
             @for (int i = 0; i < images.Count(); i++)
             {
@@ -38,13 +38,13 @@
             var imgSrc = String.Format("data:image/gif;base64,{0}", base64);
             if (i==0)
             {
-                <div class="carousel-item active img-fluid">
+                <div class="carousel-item active">
                     <img class="d-block w-100" src="@imgSrc">
                 </div>
             }
             else
             {
-                <div class="carousel-item img-fluid">
+                <div class="carousel-item">
                     <img class="d-block w-100"  src="@imgSrc" >
                 </div>
             }

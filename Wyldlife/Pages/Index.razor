@@ -8,6 +8,7 @@
 @inject Wyldlife.Services.LocationService locationservice
 @using Wyldlife.Models
 @inject NavigationManager NavManager
+@inject Wyldlife.Services.ImageService imageService
 
 <h1>Home</h1>
 
@@ -40,9 +41,21 @@
 <br />
 @for (int i = 0; i < locations.Count; i++)
 {
+    var image = imageService.getImages(locations[i].Id).FirstOrDefault();
+    string imgSrc = "";
+    if(image != null)
+    {
+        var base64 = Convert.ToBase64String(image);
+        imgSrc = String.Format("data:image/gif;base64,{0}", base64);
+    }
+
     <div class="row">
         <div class="col-sm-6">
             <div class="card h-100" style="width: 75%">
+                @if (imgSrc != "")
+                {
+                    <img class="card-img-top" style="width:100%; height:15vw; object-fit:cover" src="@imgSrc" alt="Card image cap" />
+                }
                 <div class="card-body">
                     <h5 class="card-title">@locations[i].Title</h5>
                     <p class="card-text">@locations[i].Description</p>
@@ -53,8 +66,19 @@
         @if (i + 1 < locations.Count)
         {
             i++;
+            image = imageService.getImages(locations[i].Id).FirstOrDefault();
+            imgSrc = "";
+            if (image != null)
+            {
+                var base64 = Convert.ToBase64String(image);
+                imgSrc = String.Format("data:image/gif;base64,{0}", base64);
+            }
             <div class="col-sm-6">
                 <div class="card h-100" style="width: 75%">
+                    @if (imgSrc != "")
+                    {
+                        <img class="card-img-top" style="width:100%; height:15vw; object-fit:cover" src="@imgSrc" alt="Card image cap" />
+                    }
                     <div class="card-body">
                         <h5 class="card-title">@locations[i].Title</h5>
                         <p class="card-text">@locations[i].Description</p>
