@@ -90,7 +90,8 @@
                 <label>
                     Add an Image:
                     <InputFile OnChange="@LoadFiles" class="form-label" for="file" style="width:200px; font-size:small" /><br /><br />
-                    <button class="btn btn-secondary form-control" id="file" @onclick="UploadImage">Upload Image</button>
+                    <button class="btn btn-secondary form-control" id="file" @onclick="UploadImage">Upload Image To Location</button> <br /><br />
+                    <button class="btn btn-secondary form-control" id="file" @onclick="UploadStory">Upload Image As Story</button>
                 </label>
             </p>
 
@@ -214,9 +215,21 @@ else
     bool AddImage = false;
 
     public void showAddImage()
-     {
+    {
         AddImage = !AddImage;
-     }
+    }
+
+    public void UploadStory()
+    {
+        if (barray != null)
+        {
+            imageService.AddStory(locationid, currentuser, barray);
+            images = imageService.getImages(locationid);
+            barray = null;
+            showAddImage();
+            NavManager.NavigateTo("/Location/" + locationid, forceLoad: true);
+        }
+    }
 
     public async Task OpenLocInMaps()
     {

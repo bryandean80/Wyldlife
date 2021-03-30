@@ -56,6 +56,7 @@ namespace Wyldlife.Services
             var command = Connection.CreateCommand();
             command.CommandText = @"SELECT id,title,author,lat,long,descrip,note
                                     FROM dbo.Locations WHERE id=@locationId;";
+            command.Parameters.AddWithValue("@locationId", locationId);
             using (var reader = command.ExecuteReader())
             {
                 while(reader.Read()){
