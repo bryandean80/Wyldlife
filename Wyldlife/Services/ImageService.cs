@@ -78,7 +78,7 @@ namespace Wyldlife.Services
 
             // Add satellite and terrain images
             command.CommandText = @"SELECT satellite,terrain FROM dbo.Maps
-                                        WHERE locationId=@locationId AND isStory=0;";
+                                        WHERE locationId=@locationId;";
             command.Parameters.AddWithValue("@locationId", locationId);
             using (var reader = command.ExecuteReader())
             {
@@ -101,7 +101,7 @@ namespace Wyldlife.Services
 
             }
             command.CommandText = @"SELECT img FROM dbo.Images
-                                        WHERE locationId=@locationId";
+                                        WHERE locationId=@locationId AND isStory=0;";
             
             using (var reader = command.ExecuteReader())
             {
