@@ -84,20 +84,26 @@
 
 <AuthorizeView>
     <Authorized>
-        <p>
-            <label>
-                Add an Image:
-                <InputFile OnChange="@LoadFiles"  style="width:200px; font-size:small"/><br /><br />
-                <button class="btn btn-secondary" @onclick="UploadImage">Upload Image</button>
-            </label>
-        </p>
-
-        <p>@exceptionMessage</p>
-
-        @if (isLoading)
+        @if (AddImage)
         {
-        <p>Loading...</p>}
-        
+            <p>
+                <label>
+                    Add an Image:
+                    <InputFile OnChange="@LoadFiles" class="form-label" for="file" style="width:200px; font-size:small" /><br /><br />
+                    <button class="btn btn-secondary form-control" id="file" @onclick="UploadImage">Upload Image</button>
+                </label>
+            </p>
+
+            <p>@exceptionMessage</p>
+
+            @if (isLoading)
+            {
+            <p>Loading...</p>}
+        }
+        else
+        {
+            <button class="btn btn-secondary" @onclick="showAddImage">Add an Image</button><br /><br />
+        }
     </Authorized>
 </AuthorizeView>
 
@@ -197,7 +203,7 @@ else
 </center>
 
 @code { [Parameter]
-        public Guid locationid { get; set; }
+    public Guid locationid { get; set; }
 
     public int numratings { get; set; }
     public string currentuser { get; set; }
@@ -205,6 +211,12 @@ else
     public Review review = new Review();
     List<byte[]> images = new List<byte[]>();
     byte[] barray;
+    bool AddImage = false;
+
+    public void showAddImage()
+     {
+        AddImage = !AddImage;
+     }
 
     public async Task OpenLocInMaps()
     {
@@ -288,6 +300,7 @@ else
             imageService.AddImage(locationid, currentuser, barray);
             images = imageService.getImages(locationid);
             barray = null;
+            showAddImage();
             NavManager.NavigateTo("/Location/" + locationid, forceLoad: true);
         }
     }
