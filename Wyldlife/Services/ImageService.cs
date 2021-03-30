@@ -49,7 +49,8 @@ namespace Wyldlife.Services
         {
             List<Image> images = new List<Image>();
             var command = Connection.CreateCommand();
-            command.CommandText = @"SELECT locationId,author,img FROM dbo.Images
+            command.CommandText = @"DELETE FROM dbo.Images WHERE isStory=1 AND uploaded < GETDATE() - 1;
+                                    SELECT locationId,author,img FROM dbo.Images
                                     WHERE isStory=1 AND uploaded>= GETDATE() - 1;";
             using (var reader = command.ExecuteReader())
             {
