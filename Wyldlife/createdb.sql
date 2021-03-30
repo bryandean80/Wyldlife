@@ -36,11 +36,19 @@ CREATE TABLE dbo.Images(
 );
 
 CREATE TABLE dbo.Maps(
-	locationId uniqueidentifier
-		DEFAULT newid() NOT NULL,
+	locationId uniqueidentifier NOT NULL,
 	satellite VARBINARY(max) NOT NULL,
 	terrain VARBINARY(max) NOT NULL,
 	PRIMARY KEY (locationId),
+	FOREIGN KEY (locationId)
+		REFERENCES dbo.Locations(id)
+);
+
+CREATE TABLE dbo.Weather(
+	locationId uniqueidentifier NOT NULL,
+	weather VARCHAR(4000) NOT NULL,
+	updated DATETIME
+		DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	FOREIGN KEY (locationId)
 		REFERENCES dbo.Locations(id)
 );
