@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Wyldlife.Models;
 
 namespace Wyldlife.Services
 {
@@ -20,17 +21,53 @@ namespace Wyldlife.Services
         }
         public void AddImage(Guid locationId, string author, byte[] image)
         {
-            var test = image.ToString();
             var command = Connection.CreateCommand();
             command.CommandText = @"
                 INSERT INTO dbo.Images (locationId, author, img)
                     VALUES(@locationId, @author, @img);";
             command.Parameters.AddWithValue("@locationId", locationId);
             command.Parameters.AddWithValue("@author", author);
-            //command.Parameters.AddWithValue("@img", image);
             command.Parameters.Add("@img", System.Data.SqlDbType.Binary);
             command.Parameters["@img"].Value = image;
             command.ExecuteNonQuery();
+        }
+
+        public void AddStory(Guid locationId, string author, byte[] image)
+        {
+            var command = Connection.CreateCommand();
+            command.CommandText = @"
+                                    INSERT INTO dbo.Images (locationId, author, img, isStory)
+                                    VALUES(@locationId, @author, @img, 1)";
+            command.Parameters.AddWithValue("@locationId", locationId);
+            command.Parameters.AddWithValue("@author", author);
+            command.Parameters.Add("@img", System.Data.SqlDbType.Binary);
+            command.Parameters["@img"].Value = image;
+            command.ExecuteNonQuery();
+        }
+
+        public List<Image> getStories()
+        {
+            List<Image> images = new List<Image>();
+            var command = Connection.CreateCommand();
+            command.CommandText = @"SELECT locationId,author,img FROM dbo.Images
+                                    WHERE isStory=1;";
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    Image newImage = new Image();
+                    newImage.locationId = reader.GetGuid(0);
+                    newImage.Author = reader.GetString(1);
+                    var sourceStream = reader.GetStream(2);
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        sourceStream.CopyTo(memoryStream);
+                        newImage.image = memoryStream.ToArray();
+                    }
+                    images.Add(newImage);
+                }
+            }
+            return images;
         }
 
         public List<byte[]> getImages(Guid locationId)
