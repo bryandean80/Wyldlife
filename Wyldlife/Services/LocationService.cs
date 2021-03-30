@@ -49,6 +49,27 @@ namespace Wyldlife.Services
             }
                 return locations;
         }
+
+        public Location getLocation(Guid locationId)
+        {
+            var loc = new Location();
+            var command = Connection.CreateCommand();
+            command.CommandText = @"SELECT id,title,author,lat,long,descrip,note
+                                    FROM dbo.Locations WHERE id=@locationId;";
+            using (var reader = command.ExecuteReader())
+            {
+                while(reader.Read()){
+                    loc.Id = reader.GetGuid(0);
+                    loc.Title = reader.GetString(1);
+                    loc.Author = reader.GetString(2);
+                    loc.Coords = new Tuple<double, double>(reader.GetDouble(3), reader.GetDouble(4));
+                    loc.Description = reader.GetString(5);
+                    loc.Notes = reader.GetString(6);
+                }
+            }
+            return loc;
+        }
+
         /// <summary>
         /// Adds a location to the database.
         /// </summary>
