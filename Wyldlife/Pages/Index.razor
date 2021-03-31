@@ -10,159 +10,52 @@
 @inject NavigationManager NavManager
 @inject Wyldlife.Services.ImageService imageService
 <center>
-<h1>Home</h1>
+    <h1>Home</h1>
 
-<div class="form-inline justify-content-center">
-    <label class="my-1 mr-2" for="distancelabel">Show me locations within: </label>
-    <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            @distancedropdown Miles
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(5); })">5 Miles</a>
-            <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(10); })">10 Miles</a>
-            <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(25); })">25 Miles</a>
-            <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(50); })">50 Miles</a>
-            <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(100); })">100 Miles</a>
-            <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(1); })">Unlimited Miles</a>
+    <div class="form-inline justify-content-center">
+        <label class="my-1 mr-2" for="distancelabel">Show me locations within: </label>
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                @distancedropdown Miles
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(5); })">5 Miles</a>
+                <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(10); })">10 Miles</a>
+                <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(25); })">25 Miles</a>
+                <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(50); })">50 Miles</a>
+                <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(100); })">100 Miles</a>
+                <a class="dropdown-item" href="#" @onclick="(e => { ChangeDistance(1); })">Unlimited Miles</a>
 
 
-        </div>
-    </div>
-    <div class="form-check mb-2 mr-sm-2" style="padding-left:10px; padding-top:10px">
-        <input class="form-control mr-sm-2" style="padding-left:5px" type="search" placeholder="Search by location name" aria-label="Search" @bind="query">
-        <button class="btn btn-outline-success my-2 my-sm-0" @onclick="search">Search</button>
-    </div>
-
-</div> <br />
-
-<div class="form-inline justify-content-center">
-    @foreach(var loc in locations)
-    {
-        var img = imageService.getStories().FirstOrDefault(x => x.locationId == loc.Id);
-        if (img != null)
-        {
-            var base64 = Convert.ToBase64String(img.image);
-            var imgSrc = String.Format("data:image/gif;base64,{0}", base64);
-            <div style="padding-left: 8px; padding-right: 8px">
-                <figure>
-                    <img src=@imgSrc style="border-radius: 50%; height:10vmin; width:10vmin;" data-toggle="modal" data-target="#exampleModalCenter" @onclick="() => showStory(loc.Id)" />
-                    <figcaption style="font-size:small">@loc.Title</figcaption>
-                </figure>
-            </div>
-        }
-    }
-
-    <!-- Modal -->
-        <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" style="max-width:100%; height:100vh" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLongTitle">@modalLoc.Title</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                       <div id="carouselExampleIndicators" class="carousel slide " data-ride="carousel" role="listbox"  style="max-width:75vmin; max-height:75vmin">
-    <div class="carousel-inner" role="listbox" style="width:75vmin; height:75vmin">
-        <ol class="carousel-indicators">
-
-            @for(int i=0; i < storyImgs.Count(); i++)
-            {
-                if (i == 0)
-                {
-                    <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
-                }
-                else
-                {
-                    <li data-target="#carouselExampleIndicators" data-slide-to=@i></li>
-                }
-            }
-        </ol>
-       
-        @for(int i=0; i < storyImgs.Count(); i++)
-        {
-            var base64 = Convert.ToBase64String(storyImgs[i].image);
-            var imgSrc = String.Format("data:image/gif;base64,{0}", base64);
-            if (i==0)
-            {
-                <div class="carousel-item active">
-                    <img style="width:75vmin; height:75vmin; object-fit:contain; object-position: center center;" class="d-block w-100" src="@imgSrc" >
-                </div>
-            }
-            else
-            {
-                <div class="carousel-item">
-                    <img style="width:75vmin; height:75vmin; object-fit:contain; object-position: center center;" class="d-block w-100"  src="@imgSrc">
-                </div>
-            }
-        }
-
-    </div>
-    <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="sr-only">Previous</span>
-    </a>
-    <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="sr-only">Next</span>
-    </a>
-</div>
-                    </div>
-                    <form class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </form>
-                </div>
             </div>
         </div>
+        <div class="form-check mb-2 mr-sm-2" style="padding-left:10px; padding-top:10px">
+            <input class="form-control mr-sm-2" style="padding-left:5px" type="search" placeholder="Search by location name" aria-label="Search" @bind="query">
+            <button class="btn btn-outline-success my-2 my-sm-0" @onclick="search">Search</button>
+        </div>
+
+    </div> <br />
+   
+    <br />
 
 
-</div>
-
-
-<br />
-<br />
-@for (int i = 0; i < locations.Count; i++)
-{
-    var image = imageService.getImages(locations[i].Id).FirstOrDefault();
-    string imgSrc = "";
-    if(image != null)
+    @for (int i = 0; i < locations.Count(); i++)
     {
-        var base64 = Convert.ToBase64String(image);
-        imgSrc = String.Format("data:image/gif;base64,{0}", base64);
-    }
+        var image = imageService.getImages(locations[i].Id).FirstOrDefault();
+        string imgSrc = "";
+        if (image != null)
+        {
+            var base64 = Convert.ToBase64String(image);
+            imgSrc = String.Format("data:image/gif;base64,{0}", base64);
+        }
 
-    <div class="row">
-        <div class="col-sm-6">
-            <div class="card h-100" style="width: 75%">
-                @if (imgSrc != "")
-                {
-                    <img class="card-img-top" style="width:100%; height:15vw; object-fit:cover" src="@imgSrc" alt="Card image cap" />
-                }
-                <div class="card-body">
-                    <h5 class="card-title">@locations[i].Title</h5>
-                    <p class="card-text">@locations[i].Description</p>
+        <div class="card mb-3" style="max-width: 540px;">
+            <div class="row no-gutters">
+                <div class="col-md-4">
+                    <img src="@imgSrc" class="card-img">
                     <a href="/Location/@locations[i].Id" class="stretched-link"></a>
                 </div>
-            </div>
-        </div>
-        @if (i + 1 < locations.Count)
-        {
-            i++;
-            image = imageService.getImages(locations[i].Id).FirstOrDefault();
-            imgSrc = "";
-            if (image != null)
-            {
-                var base64 = Convert.ToBase64String(image);
-                imgSrc = String.Format("data:image/gif;base64,{0}", base64);
-            }
-            <div class="col-sm-6">
-                <div class="card h-100" style="width: 75%">
-                    @if (imgSrc != "")
-                    {
-                        <img class="card-img-top" style="width:100%; height:15vw; object-fit:cover" src="@imgSrc" alt="Card image cap" />
-                    }
+                <div class="col-md-8">
                     <div class="card-body">
                         <h5 class="card-title">@locations[i].Title</h5>
                         <p class="card-text">@locations[i].Description</p>
@@ -170,11 +63,8 @@
                     </div>
                 </div>
             </div>
-        }
-
-    </div>
-    <br />
-}
+        </div>
+    }
 </center>
 
 
@@ -195,15 +85,6 @@
 
     public string distancedropdown { get; set; }
 
-    Location modalLoc = new Location();
-
-    List<Image> storyImgs = new List<Image>();
-
-    public void showStory(Guid locId)
-    {
-        modalLoc = locationservice.getLocation(locId);
-        storyImgs = imageService.getStories().Where(x => x.locationId == modalLoc.Id).ToList();
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstrender)
     {
