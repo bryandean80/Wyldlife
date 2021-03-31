@@ -9,6 +9,13 @@ namespace Wyldlife.Models
 {
     public class ForecastDay
     {
+        public ForecastDay()
+        {
+            high = 0;
+            low = 0;
+            icon = string.Empty;
+            description = string.Empty;
+        }
         public int high;
         public int low;
         public string icon;
@@ -20,22 +27,33 @@ namespace Wyldlife.Models
         public int currentTemp;
         public string currentIcon;
         public string currentDescription;
-        public ForecastDay[] forecast;
-
+        public List<ForecastDay> forecast; 
+        
+        public Weather()
+        {
+            weatherData = string.Empty;
+            currentTemp = 0;
+            currentIcon = string.Empty;
+            currentDescription = string.Empty;
+            forecast = new List<ForecastDay>();
+        }
         public Weather(string weather)
         {
             weatherData = weather;
             dynamic weatherObj = JObject.Parse(weather);
             currentTemp = weatherObj.current.temp;
-            currentDescription = weatherObj.current.weather.description;
-            currentIcon = getEmoji(weatherObj.current.weather.icon);
-            forecast = new ForecastDay[8];
-            for(int i =0; i < 8; i++)
+            currentDescription = weatherObj.current.weather[0].description;
+            string str = weatherObj.current.weather[0].icon;
+            currentIcon = getEmoji(str);
+            forecast = new List<ForecastDay>();
+            for (int i =0; i < 8; i++)
             {
-                forecast[i].high = weatherObj.daily[i].temp.max;
-                forecast[i].low = weatherObj.daily[i].temp.min;
-                forecast[i].description = weatherObj.daily[i].weather.description;
-                forecast[i].icon = getEmoji(weatherObj.daily[i].weather.icon);
+                ForecastDay day = new ForecastDay();
+                day.high = weatherObj.daily[i].temp.max;
+                day.low = weatherObj.daily[i].temp.min;
+                day.description = weatherObj.daily[i].weather[0].description.ToString();
+                day.icon = getEmoji(weatherObj.daily[i].weather[0].icon.ToString());
+                forecast.Add(day);
             }
         }
         private string getEmoji(string iconName)

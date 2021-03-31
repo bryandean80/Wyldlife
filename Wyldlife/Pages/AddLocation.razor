@@ -99,7 +99,7 @@
         notes = string.Empty;
         latitude = 0.0;
         longitude = 0.0;
-        NavManager.NavigateTo("/Location/" + location.Id.ToString());
+        NavManager.NavigateTo("/Location/" + location.Id.ToString(), forceLoad: true);
     }
 
     private async Task GetCurrentUser()
