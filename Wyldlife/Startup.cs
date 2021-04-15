@@ -16,6 +16,8 @@ using Microsoft.Extensions.Hosting;
 using Wyldlife.Areas.Identity;
 using Wyldlife.Data;
 using Wyldlife.Services;
+using Microsoft.AspNetCore.Identity.UI.Services;
+
 
 namespace Wyldlife
 {
@@ -37,6 +39,13 @@ namespace Wyldlife
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            // requires
+            // using Microsoft.AspNetCore.Identity.UI.Services;
+            // using WebPWrecover.Services;
+            services.AddTransient<IEmailSender, EmailSender>();
+            services.Configure<AuthMessageSenderOptions>(Configuration);
+
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
