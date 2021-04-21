@@ -90,10 +90,11 @@ namespace Wyldlife.Areas.Identity.Pages.Account
                         "/Account/ConfirmEmail",
                         pageHandler: null,
                         values: new { area = "Identity", userId = user.Id, code = code, returnUrl = returnUrl },
-                        protocol: Request.Scheme);
+                        protocol: Request.Scheme); 
 
                     await _emailSender.SendEmailAsync(Input.Email, "Wyldlife - Confirm Your Email",
-                        $"Welcome to Wyldlife <strong>{user.UserName}</strong>!<br><br>Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.<br><br>Happy trailing!");
+                        $"Welcome to Wyldlife <strong>{user.UserName}</strong>!<br><br>Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.<br><br>Happy trailing!" +
+                        $"<br><br><br><img src=\"https://raw.githubusercontent.com/bryandean80/Wyldlife/82959fd903ecad179e72b391ef208854d0add119/Design/vector/default.svg?token=ABMFP6KM5D6MYEIKXKV7UJDAQCYWA \" style=\"height:256px\">");
           
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
